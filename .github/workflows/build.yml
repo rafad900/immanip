@@ -1,0 +1,135 @@
+name: Build and package
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: Package
+        run: |
+          cpack --config build/CPackConfig.cmake -B dist
+          cpack --config build/CPackSourceConfig.cmake -B dist
+      - name: Install Debian packages
+        run: sudo apt-get install -y ./dist/libimmanip0_*.deb ./dist/libimmanip-dev_*.deb
+      - name: Test installed package
+        run: |
+          pkg-config --modversion immanip
+          cmake -S tests/consumer -B build-consumer
+          cmake --build build-consumer --parallel
+          ctest --test-dir build-consumer --output-on-failure
+          cc tests/test_immanip.c $(pkg-config --cflags --libs immanip) -o build-consumer/pkg-consumer
+          ./build-consumer/pkg-consumer
+      - uses: actions/upload-artifact@v4
+        with:
+          name: immanip-packages-ubuntu-24.04
+          path: |
+            dist/*.deb
+            dist/*.tar.gz
+          if-no-files-found: error
+
+  publish-apt:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: publish-apt
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: immanip-packages-ubuntu-24.04
+          path: packages
+      - name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Release tag must be vMAJOR.MINOR.PATCH" >&2
+            exit 1
+          fi
+          echo "RELEASE_VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
+      - name: Install repository tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apt-utils
+      - name: Prepare repository history
+        run: |
+          set -euo pipefail
+          branch=$(git ls-remote --heads origin refs/heads/apt-repository)
+          git worktree add --detach "$RUNNER_TEMP/apt-repo" "$GITHUB_SHA"
+          if [[ -n "$branch" ]]; then
+            git fetch origin refs/heads/apt-repository:refs/remotes/origin/apt-repository
+            git -C "$RUNNER_TEMP/apt-repo" switch -c apt-repository --track origin/apt-repository
+          else
+            git -C "$RUNNER_TEMP/apt-repo" switch --orphan apt-repository
+          fi
+      - name: Import signing key
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$APT_GPG_PRIVATE_KEY"
+          printf '%s\n' "$APT_GPG_PRIVATE_KEY" | gpg --batch --import
+      - name: Generate signed repository
+        env:
+          APT_GPG_FINGERPRINT: ${{ vars.APT_GPG_FINGERPRINT }}
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+        run: bash scripts/generate-apt-repo.sh "$RUNNER_TEMP/apt-repo" packages "$RELEASE_VERSION"
+      - name: Verify repository with apt
+        run: |
+          set -euo pipefail
+          repo="$RUNNER_TEMP/apt-repo"
+          state="$RUNNER_TEMP/apt-test"
+          mkdir -p "$state/lists/partial"
+          echo "deb [arch=amd64 signed-by=$repo/immanip-archive-keyring.gpg] file:$repo stable main" > "$state/sources.list"
+          opts=(-o "Dir::Etc::sourcelist=$state/sources.list"
+                -o Dir::Etc::sourceparts=- -o "Dir::State::lists=$state/lists"
+                -o Dir::Cache::pkgcache= -o Dir::Cache::srcpkgcache=
+                -o APT::Sandbox::User=root)
+          apt-get "${opts[@]}" update
+          apt-cache "${opts[@]}" show "libimmanip-dev=$RELEASE_VERSION" > /dev/null
+          sudo apt-get "${opts[@]}" install -y "libimmanip-dev=$RELEASE_VERSION"
+          pkg-config --modversion immanip
+      - name: Save package history
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/apt-repo"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pool dists immanip-archive-keyring.gpg
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish apt packages for $RELEASE_VERSION"
+          fi
+          git push origin HEAD:refs/heads/apt-repository
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p "$RUNNER_TEMP/apt-site"
+          cp -a "$RUNNER_TEMP/apt-repo/pool" "$RUNNER_TEMP/apt-repo/dists" \
+            "$RUNNER_TEMP/apt-repo/immanip-archive-keyring.gpg" "$RUNNER_TEMP/apt-site/"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/apt-site
+      - id: deploy
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,10 @@
+prefix=${pcfiledir}/@immanip_pc_prefix@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: immanip
+Description: @PROJECT_DESCRIPTION@
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -limmanip
+Cflags: -I${includedir}

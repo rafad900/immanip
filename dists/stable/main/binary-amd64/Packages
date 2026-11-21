@@ -1,0 +1,31 @@
+Package: libimmanip-dev
+Architecture: amd64
+Version: 0.1.0
+Priority: optional
+Section: devel
+Maintainer: Immanip maintainers <rafael.a.diazcruz.dev@brulent.com>
+Installed-Size: 42
+Depends: libimmanip0 (= 0.1.0)
+Filename: pool/main/libimmanip-dev_0.1.0_amd64.deb
+Size: 4086
+MD5sum: 2010bda6198ad2a310a44f7f45280fce
+SHA1: 5fd2b9101f3ebe5c53f81257f67e51b441519082
+SHA256: 654227235a70ed55cca9b41a6fdd1f100109ae27aaea2c201050f6d54ffaac01
+SHA512: 05b770dd1dcf8b2e71a5b28ed816addd62df56e3f4fb416bad8737863c1b8413002e31ebea9b2fb118620178f8579838bbf2e0e8c84efc05cbe85ded9ed24ae3
+Description: A C image manipulation library
+
+Package: libimmanip0
+Architecture: amd64
+Version: 0.1.0
+Priority: optional
+Section: devel
+Maintainer: Immanip maintainers <rafael.a.diazcruz.dev@brulent.com>
+Installed-Size: 55
+Filename: pool/main/libimmanip0_0.1.0_amd64.deb
+Size: 3346
+MD5sum: 303c7db10947819526c991644c062ac1
+SHA1: e8d4c753a5dc736bf933d64b189622f1a0e52a47
+SHA256: feef0f80a502edf1669de8a0e55ab98da7448151ffb302347ac165cdc2f7c4dd
+SHA512: b0bcef15fe37b94f746f88a1f1fa4ac80918013a38b0b16cc58d427d7e130697f210127ac44165bc097ae30b5560636218b6a3951f99963767e7502b66049034
+Description: A C image manipulation library
+

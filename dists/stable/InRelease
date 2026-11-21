@@ -1,0 +1,33 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Architectures: amd64
+Codename: stable
+Components: main
+Date: Sat, 21 Nov 2026 06:00:03 +0000
+Label: Immanip
+Origin: Immanip
+Suite: stable
+MD5Sum:
+ 8678d0dbe0227c9a1d45b3fdc3c2ec0a              138 Release
+ 860a961724ee423b5b852a6d76301f8c             1195 main/binary-amd64/Packages
+ 383ebced7b7764c09aae823ee013f5d8              628 main/binary-amd64/Packages.gz
+SHA1:
+ ce4f096fca5f1961865b9ecacfd45808e6a74277              138 Release
+ b3706c4c580611cc1c1f2f5978c5fe45e280ca48             1195 main/binary-amd64/Packages
+ 2d1dc470a77ac080647e6d0e7fa1ba3960e2d6b5              628 main/binary-amd64/Packages.gz
+SHA256:
+ 35c5e60e0528681c9ab9f38013883b5f9a679ce63cf3f17c35e7c8743772ef83              138 Release
+ 73f055832d3e9e400b27969f78dbaeacb2beaa9511af1679589b817629f85501             1195 main/binary-amd64/Packages
+ 24551bf5414ed9d9129a8f0633a6b4821be4c35e3a53f85ecca929132ef908d3              628 main/binary-amd64/Packages.gz
+SHA512:
+ 5cf0fc975236097bdc97d82c7e05cb0d7010eb3e41c864f62e68b59fb1aa40cf0d93bd37a1c054a35ac9dabaf95aabd207fc856c8664d9d4f931e78136d623cc              138 Release
+ 7b64c9bff7801b01209a9bf71a7fb6ce331c2f1e28b5835596c4f8d6970eb108cdfe0b610492cafb8c065e83bc8b4fff3999bed2f3444158a14d2f9ad2937f03             1195 main/binary-amd64/Packages
+ 13c9981d2cf61dce47144fc0dcb2bb50cc8110063363273ce701c743ec03f5c46c89b7a95e3f26086f0137a3f796f8249632fe81e3af30e91ab13603e1052948              628 main/binary-amd64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYKAB0WIQSNJ67fS/IyyexoFCrGqYKsOdMr2wUCawEzYwAKCRDGqYKsOdMr
+2/tYAQColmykWPP2nXe4VHJXuIzXJQlXZ1Z6NTmh21JDgAAh3wD/T/+LI3uuyofm
+hbIqnrEXJfJBo/1u4IE0onqE6atgIAA=
+=KJN3
+-----END PGP SIGNATURE-----
